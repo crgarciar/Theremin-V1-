@@ -16,7 +16,8 @@ void setup() {
 }
 
 void loop() {
-  distance = sr04.Distance(); 
+  distance = sr04.Distance();
+  
  
 if (distance > 60 || distance <= 0) {
     noTone(TONE_PIN);
@@ -27,10 +28,11 @@ if (distance > 60 || distance <= 0) {
     if (digitalRead(BUTTON_PIN) == HIGH) {
       // Range 1: Lower frequencies (200 - 1000 Hz)
       cleanDistance = constrain(distance, 2, 60);
-      int frequency = map(cleanDistance, 2, 60, 200, 1000); 
+      frequency = map(cleanDistance, 2, 60, 200, 1000); 
     } else {
       // Range 2: Higher frequencies (1001 - 1800 Hz)
-      int frequency = map(cleanDistance, 2, 60, 1001, 1800);
+      cleanDistance = constrain(distance, 2, 60);
+      frequency = map(cleanDistance, 2, 60, 1001, 1800);
     }
 
     tone(TONE_PIN, frequency);
