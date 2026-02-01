@@ -2,49 +2,75 @@
 
 #define TRIG_PIN 12
 #define ECHO_PIN 11
-#define TONE_PIN 8    // Keep Buzzer on Pin 8
-#define BUTTON_PIN 2  // MOVE BUTTON TO PIN 2
-int distance = 0;
-int cleanDistance = 0;
+#define TONE_PIN 8
+#define BUTTON_PIN 2
 
 SR04 sr04(ECHO_PIN, TRIG_PIN);
 
+// --- MOVING AVERAGE FILTER SETUP ---
+const int numReadings = 20;     // Number of inputs to average
+long readings[numReadings];      // The history array
+int readIndex = 0;              // The index of the current reading
+long total = 0;                  // The running total
+long averageDistance = 0;        // The final filtered result
+
 void setup() {
   Serial.begin(9600);
-  pinMode(BUTTON_PIN, INPUT_PULLUP); 
- 
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  
+  // Initialize all readings to 0
+  for (int i = 0; i < numReadings; i++) {
+    readings[i] = 0;
+  }
 }
 
 void loop() {
-  distance = sr04.Distance();
+  // 1. Subtract the oldest reading from the total
+  total = total - readings[readIndex];
   
- 
-if (distance > 60 || distance <= 0) {
+  // 2. Read from the sensor
+  long currentDist = sr04.Distance();
+  
+  // 3. Simple error handling: if sensor misses, don't add 0 to the average
+  if (currentDist > 0 && currentDist < 200) {
+    readings[readIndex] = currentDist;
+  }
+  
+  // 4. Add the new reading to the total
+  total = total + readings[readIndex];
+  
+  // 5. Advance to the next position in the array
+  readIndex = readIndex + 1;
+
+  // 6. If we're at the end of the array, wrap around to the beginning
+  if (readIndex >= numReadings) {
+    readIndex = 0;
+  }
+
+  // 7. Calculate the average
+  averageDistance = total / numReadings;
+
+  // --- LOGIC USING THE SMOOTHED AVERAGE ---
+  if (averageDistance > 60 || averageDistance <= 0) {
     noTone(TONE_PIN);
   } else {
+    long cleanDistance = constrain(averageDistance, 2, 60);
     int frequency;
-    
-    // Check the button to decide the "Octave" or Range
-    if (digitalRead(BUTTON_PIN) == HIGH) {
-      // Range 1: Lower frequencies (200 - 1000 Hz)
-      cleanDistance = constrain(distance, 2, 60);
+
+    if (digitalRead(BUTTON_PIN) == LOW) {
       frequency = map(cleanDistance, 2, 60, 200, 1000); 
     } else {
-      // Range 2: Higher frequencies (1001 - 1800 Hz)
-      cleanDistance = constrain(distance, 2, 60);
       frequency = map(cleanDistance, 2, 60, 1001, 1800);
     }
 
     tone(TONE_PIN, frequency);
     
-    Serial.print("Dist: ");
-    Serial.print(cleanDistance);
-    Serial.print(" cm | Freq: ");
-    Serial.println(frequency);
+    Serial.print("Smoothed Dist: ");
+    Serial.println(averageDistance);
   }
-
-  delay(50); 
 }
+
+
 /*
 #include "SR04.h"
 #include "pitches.h"
