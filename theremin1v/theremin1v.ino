@@ -57,7 +57,7 @@ void loop() {
     long cleanDistance = constrain(averageDistance, 2, 60);
     int frequency;
 
-    if (digitalRead(BUTTON_PIN) == LOW) {
+    if (digitalRead(BUTTON_PIN) == HIGH) {
       frequency = map(cleanDistance, 2, 60, 200, 1000); 
     } else {
       frequency = map(cleanDistance, 2, 60, 1001, 1800);
