@@ -4,19 +4,21 @@
 #define ECHO_PIN 11
 #define TONE_PIN 8    // Keep Buzzer on Pin 8
 #define BUTTON_PIN 2  // MOVE BUTTON TO PIN 2
+int distance = 0;
+int cleanDistance = 0;
 
 SR04 sr04(ECHO_PIN, TRIG_PIN);
 
 void setup() {
   Serial.begin(9600);
   pinMode(BUTTON_PIN, INPUT_PULLUP); 
+ 
 }
 
 void loop() {
-  long distance = sr04.Distance();
-  long cleanDistance = constrain(distance, 2, 60);
-
-  if (distance > 60 || distance <= 0) {
+  distance = sr04.Distance(); 
+ 
+if (distance > 60 || distance <= 0) {
     noTone(TONE_PIN);
   } else {
     int frequency;
@@ -24,10 +26,11 @@ void loop() {
     // Check the button to decide the "Octave" or Range
     if (digitalRead(BUTTON_PIN) == HIGH) {
       // Range 1: Lower frequencies (200 - 1000 Hz)
-      frequency = map(cleanDistance, 2, 60, 200, 1000); 
+      cleanDistance = constrain(distance, 2, 60);
+      int frequency = map(cleanDistance, 2, 60, 200, 1000); 
     } else {
       // Range 2: Higher frequencies (1001 - 1800 Hz)
-      frequency = map(cleanDistance, 2, 60, 1001, 1800);
+      int frequency = map(cleanDistance, 2, 60, 1001, 1800);
     }
 
     tone(TONE_PIN, frequency);
