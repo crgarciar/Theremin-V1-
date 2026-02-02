@@ -52,7 +52,7 @@ Move your hand toward or away from the ultrasonic sensor.
 
 Closer (2cm): Higher Pitch Further (60cm): Lower Pitch Toggle Range: \* Released: Play in the standard range ($200Hzt-1000Hz).
 
-Pressed: Shift into the high-frequency "solo" range ($1001Hz-1800Hz).
+Pressed: Shift into the high-frequency "solo" range (1001Hz-1800Hz).
 
 Silence: Move your hand more than 60cm away to stop the sound.
 
